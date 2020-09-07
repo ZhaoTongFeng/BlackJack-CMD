@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30413.136
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CMDGameTemplate", "CMDGameTemplate.vcxproj", "{D1096AB9-ACA6-446D-8230-A2049992B954}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BlackJack-CMD", "BlackJack-CMD.vcxproj", "{D1096AB9-ACA6-446D-8230-A2049992B954}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
