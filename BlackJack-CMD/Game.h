@@ -29,9 +29,6 @@ private:
 	//游戏是否结束
 	bool isRunning = true;
 
-
-
-
 	///////////////////////////////////////////////////
 	//洗牌
 	void Shuffle();
@@ -45,35 +42,30 @@ private:
 	//分发奖励
 	void GivePrize(class Cards* c);
 
-
 	//牌堆
 	int* cards;
 	//牌堆栈顶指针
 	int cards_ptr;
 	
-
 	//庄家手牌
 	class Cards* cards_banker;
-
 	//玩家手牌一
 	class Cards* cards_player_1;
 	//玩家手牌二
 	class Cards* cards_player_2;
-
 	//玩家当前正在操作的手牌
 	class Cards* cards_current;
 
 	//当前阶段
 	int mSession;
 
-	//负数减少，正数增加
+	//输入状态：0无操作，负数减少，正数增加
 	int dir_base;
 	int dir_bet;
 	int dir_coin;
-	bool StartGame;
 	int dir_insurance;
 	int option;
-
+	bool StartGame;
 
 	//下注基数
 	float mBase;
@@ -87,6 +79,9 @@ private:
 	//此回合获胜筹码数
 	int mWinCoin;
 
+	//作弊模式
 	bool isDebug;
+
+	//显示规则
 	bool isShowRule;
 };

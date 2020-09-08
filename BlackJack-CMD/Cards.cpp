@@ -17,7 +17,7 @@ void Cards::ReSet()
     isDouble = false;
     bet = 0;
     isFinish = false;
-    isWin = 0;
+    winState = 0;
 }
 
 void Cards::ComputeAttribute()
@@ -76,32 +76,30 @@ void Cards::Compare(Cards* banker)
 {
     //玩家手牌有没有爆牌
     if (isOutRange) {
-        isWin = -1;
+        winState = -1;
     }
     //庄家是否爆牌
     else if (banker->isOutRange) {
-        isWin = 1;
+        winState = 1;
     }
     //再看是不是平局
     else if (banker->sum == sum) {
-        isWin = 2;
+        winState = 2;
     }
     //庄家是不是黑杰克
     else if (banker->IsBlackJack()) {
-        isWin = -1;
+        winState = -1;
     }
     //玩家是不是黑杰克
     else if (IsBlackJack() && !isSplitCards) {
-        isWin = 1;
-        //获得1.5倍下注
-        bet = static_cast<int>(floor(bet * 1.5f));
+        winState = 3;
     }
     //都不是就比较分数
     else if (banker->sum > sum) {
-        isWin = -1;
+        winState = -1;
     }
     else if (banker->sum < sum) {
-        isWin = 1;
+        winState = 1;
     }
 }
 

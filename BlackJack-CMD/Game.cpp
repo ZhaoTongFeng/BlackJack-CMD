@@ -4,7 +4,6 @@
 
 bool Game::Initialize()
 {
-    //52张牌全部添加到牌堆
     cards = new int[52];
     for (int i = 0; i < 52; i++) {
         cards[i] = i + 1;
@@ -15,16 +14,12 @@ bool Game::Initialize()
     cards_player_2 = new Cards();
 
     mSession = 0;
-
     mCoin = 10000;
-    mBet = 0;
+    mBet = 50;
     mBase = 10.0f;
-
     mWinCoin = 0;
-
     isDebug = true;
     isShowRule = false;
-
     return true;
 }
 
@@ -61,6 +56,9 @@ void Game::ProcessInput()
         int key = _getch();
         if (key == 'r') {
             isShowRule = !isShowRule;
+        }
+        if (key == 'p') {
+            isRunning = false;
         }
         if (mSession == 0) {
             //1.下注环节
@@ -112,8 +110,6 @@ void Game::ProcessInput()
                     mBet = mCoin > mBet ? mBet : mCoin;
                     mWinCoin = 0;
                     mSession = 0;
-
-                    
                 }
             }
         }
@@ -128,21 +124,19 @@ void Game::UpdateGame()
         if (newcoin >= 0) {
             mCoin = newcoin;
         }
+
         int newbet = mBet + dir_bet * static_cast<int>(mBase);
         if (newbet >= 0 && newbet <= mCoin) {
             mBet = newbet;
         }
 
-        if(dir_base == 1){
-            if (mBase < 10000) {
-                mBase *= 10;
-            }
+        if(dir_base == 1&& mBase < 10000){
+            mBase *= 10;
         }
-        else if (dir_base == -1) {
-            if (mBase > 1) {
-                mBase /= 10;
-            }
+        else if (dir_base == -1&& mBase > 1) {
+            mBase /= 10;
         }
+
         if (StartGame) {
             if (mBet == 0) {
                 return;
@@ -151,7 +145,6 @@ void Game::UpdateGame()
             cards_player_1->isFinish = false;
             cards_player_2->isFinish = true;
 
-            //默认为手牌一
             cards_current = cards_player_1;
 
             //从筹码扣除下注
@@ -181,14 +174,15 @@ void Game::UpdateGame()
     else if (mSession & 7) {
         //2.操作环节 A S D F
         if (mSession & 1) {
-            //保险
+            //2.1.保险
             if (dir_insurance == 1) {
                 mCoin -= static_cast<int>(floor(mBet / 2.0f));
-
             }
             if (dir_insurance != 0) {
-                //庄家检查另外一张底牌，如果是10点直接结束游戏
+                //如果玩家是黑杰克则判断是否购买了保险并结算，结束本回合
+                //否则继续手牌操作
                 if (cards_banker->IsBlackJack()) {
+
                     if (dir_insurance == 1) {
                         //购买了保险，退还下注
                         mCoin += mBet;
@@ -203,10 +197,10 @@ void Game::UpdateGame()
                 else {
                     mSession = 2;
                 }
-
             }
         }
         else if (mSession & 2) {
+            //2.2.手牌操作
             switch (option)
             {
             case 0:
@@ -219,8 +213,8 @@ void Game::UpdateGame()
 
                 break;
             case 2:
-                //对当前的手牌进行加倍，加倍之后停牌
-                if (!cards_player_1->isSplitCards) {
+                //加倍
+                if (!cards_player_1->isSplitCards&& mCoin>= mBet) {
                     mCoin -= mBet;
                     cards_current->bet += mBet;
                     HandCard(cards_current);
@@ -228,27 +222,31 @@ void Game::UpdateGame()
                 }
                 break;
             case 3:
-                //没有进行过分牌并且手牌一为对子
+                //分牌
                 if (!cards_player_1->isSplitCards && cards_player_1->isDouble) {
                     SplitCards();
                 }
                 break;
             default:break;
             }
-            //爆牌或者点数等于21点,结束此手牌操作，如果进行了分牌再进行第二幅牌的操作
+
+            //爆牌或者点数等于21点,强制结束此手牌操作，如果进行了分牌再进行第二幅牌的操作
             if (cards_current->is21 || cards_current->isOutRange) {
                 cards_current->isFinish = true;
-                cards_current->isWin = -1;
-                if (cards_player_1->isSplitCards) {
-                    cards_current = cards_player_2;
-                }
             }
-            //都结束之后,如果庄家的点数小于17点则拿牌，直到超过17点
+
+            //切换当前手牌到第二手牌
+            if (!cards_player_2->isFinish&&cards_player_1->isFinish&& cards_player_1->isSplitCards) {
+                cards_current = cards_player_2;
+            }
+
+            //玩家操作结束
             if (cards_player_2->isFinish && cards_player_1->isFinish) {
+                //如果庄家的点数小于17点则拿牌，直到超过17点
                 while (cards_banker->sum < 17) {
                     HandCard(cards_banker);
                 }
-                //最后对两幅手牌分别进行比较,然后分发奖励
+                //最后用玩家两幅手牌分别和庄家进行比较,并分发奖励
                 cards_player_1->Compare(cards_banker);
                 GivePrize(cards_player_1);
 
@@ -257,12 +255,13 @@ void Game::UpdateGame()
                     GivePrize(cards_player_2);
                 }
 
-                //最后跳转到结算环节
+                //跳转到结算页面
                 mSession = 4;
             }
         }
     }
 }
+
 void Game::Shuffle()
 {
     //通过交换牌的位置打乱牌堆的顺序
@@ -286,17 +285,22 @@ void Game::HandCard(Cards* c)
 
 void Game::GivePrize(Cards* c)
 {
-    if (c->isWin == 1) {
+    if (c->winState == 1) {
         //赢了发双倍下注
-        mCoin += c->bet * 2;
+        mCoin += static_cast<int>(floor(c->bet * 2.0f));
         mWinCoin += c->bet;
     }
-    else if (c->isWin == 2) {
+    else if (c->winState == 3) {
+        //玩家黑杰克获胜
+        mCoin += static_cast<int>(floor(c->bet * 2.5f));
+        mWinCoin += static_cast<int>(floor(c->bet * 1.5f));
+    }
+    else if (c->winState == 2) {
         //平局把下注退还
         mCoin += c->bet;
         mWinCoin = 0;
     }
-    else if (c->isWin == -1) {
+    else if (c->winState == -1) {
         mWinCoin -= c->bet;
     }
 }
@@ -307,16 +311,11 @@ void Game::SplitCards()
         int n1 = cards[--cards_ptr];
         int n2 = cards[--cards_ptr];
         cards_player_1->SplitCard(cards_player_2, n1, n2);
-        //给手牌二下注
         mCoin -= mBet;
         cards_player_2->bet += mBet;
         cards_player_2->isFinish = false;
     }
 }
-
-
-
-
 
 void Game::GenerateOutput() {
     
@@ -382,20 +381,20 @@ void Game::GenerateOutput() {
         
         std::cout << "闲家：\n";
         std::cout << "手牌：" << cards_player_1->GetCardsDisplayStr() << "\t点数：" << cards_player_1->GetSumDisplayStr();
-        if (cards_player_1->isWin == 1) {
+        if (cards_player_1->winState == 1) {
             std::cout << "\t胜利";
         }
-        else if (cards_player_1->isWin == -1) {
+        else if (cards_player_1->winState == -1) {
             std::cout << "\t失败";
         }
         std::cout << "\n";
 
         if (cards_player_1->isSplitCards) {
             std::cout << "手牌：" << cards_player_2->GetCardsDisplayStr() << "\t点数：" << cards_player_2->GetSumDisplayStr();
-            if (cards_player_2->isWin == 1) {
+            if (cards_player_2->winState == 1) {
                 std::cout << "\t胜利";
             }
-            else if (cards_player_2->isWin == -1) {
+            else if (cards_player_2->winState == -1) {
                 std::cout << "\t失败";
             }
             std::cout << "\n";
@@ -443,7 +442,7 @@ void Game::GenerateOutput() {
             std::cout << "A：要牌\n";
             std::cout << "S：停牌\n";
 
-            if (!cards_player_1->isSplitCards) {
+            if (!cards_player_1->isSplitCards && mCoin >= mBet) {
                 std::cout << "D：加倍\n";
             }
             if (!cards_player_1->isSplitCards&& cards_player_1->isDouble) {
