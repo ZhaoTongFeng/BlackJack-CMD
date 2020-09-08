@@ -1,9 +1,9 @@
-#pragma once
-#include <iomanip>
-#include <windows.h>
+﻿#pragma once
+
+#include <time.h>
 #include <conio.h>
 #include <iostream>
-#include <stdio.h>
+
 
 class Game {
 public:
@@ -29,9 +29,64 @@ private:
 	//游戏是否结束
 	bool isRunning = true;
 
-	//是否需要更新游戏
-	bool update = true;
 
-	//累计毫秒数，
-	long tickCount, currentTick;
+
+
+	///////////////////////////////////////////////////
+	//洗牌
+	void Shuffle();
+	
+	//发牌
+	void HandCard(class Cards* c);
+
+	//分牌
+	void SplitCards();
+
+	//分发奖励
+	void GivePrize(class Cards* c);
+
+
+	//牌堆
+	int* cards;
+	//牌堆栈顶指针
+	int cards_ptr;
+	
+
+	//庄家手牌
+	class Cards* cards_banker;
+
+	//玩家手牌一
+	class Cards* cards_player_1;
+	//玩家手牌二
+	class Cards* cards_player_2;
+
+	//玩家当前正在操作的手牌
+	class Cards* cards_current;
+
+	//当前阶段
+	int mSession;
+
+	//负数减少，正数增加
+	int dir_base;
+	int dir_bet;
+	int dir_coin;
+	bool StartGame;
+	int dir_insurance;
+	int option;
+
+
+	//下注基数
+	float mBase;
+
+	//当前下注
+	int mBet;
+
+	//玩家筹码
+	int mCoin;
+
+	//此回合获胜筹码数
+	int mWinCoin;
+
+	bool isDebug;
+	bool isShowRule;
 };
