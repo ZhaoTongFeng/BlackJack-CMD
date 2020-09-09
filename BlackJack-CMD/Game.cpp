@@ -158,9 +158,7 @@ void Game::UpdateGame()
                 HandCard(cards_banker);
                 HandCard(cards_current);
             }
-            if (cards_current->isOutRange) {
-                SplitCards();
-            }
+
             
             //检查庄家明牌是否为A，如果为A则跳转1，购买保险，否则跳转2，玩家进行操作
             if (cards_banker->IsFirA()) {
@@ -168,6 +166,10 @@ void Game::UpdateGame()
             }
             else {
                 mSession = 2;
+                //如果闲家手牌直接超过21点,但却不是黑杰克，强制分牌，如果资金不足会导致分牌失败，直接爆牌
+                if (cards_current->isOutRange && !cards_current->IsBlackJack()) {
+                    SplitCards();
+                }
             }
         }
     }
@@ -196,6 +198,10 @@ void Game::UpdateGame()
                 }
                 else {
                     mSession = 2;
+                    //如果闲家手牌直接超过21点,但却不是黑杰克，强制分牌，如果资金不足会导致分牌失败，直接爆牌
+                    if (cards_current->isOutRange && !cards_current->IsBlackJack()) {
+                        SplitCards();
+                    }
                 }
             }
         }
