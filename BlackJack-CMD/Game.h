@@ -53,7 +53,7 @@ private:
 	class Cards* cards_player_1;
 	//玩家手牌二
 	class Cards* cards_player_2;
-	//玩家当前正在操作的手牌
+	//指向玩家当前正在操作的手牌
 	class Cards* cards_current;
 
 	//当前阶段

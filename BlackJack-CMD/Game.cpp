@@ -4,6 +4,8 @@
 
 bool Game::Initialize()
 {
+    std::ios::sync_with_stdio(false);
+
     cards = new int[52];
     for (int i = 0; i < 52; i++) {
         cards[i] = i + 1;
@@ -166,10 +168,6 @@ void Game::UpdateGame()
             }
             else {
                 mSession = 2;
-                //如果闲家手牌直接超过21点,但却不是黑杰克，强制分牌，如果资金不足会导致分牌失败，直接爆牌
-                if (cards_current->isOutRange && !cards_current->IsBlackJack()) {
-                    SplitCards();
-                }
             }
         }
     }
@@ -327,146 +325,143 @@ void Game::GenerateOutput() {
     
     //输出图像
     system("cls");//清屏
-    std::cout << "*****BlackJack/21点控制台版*****\n";
-    std::cout << "显示规则：R\n";
-    if (isShowRule) {
-        std::cout << "游戏规则：\n";
-        std::cout << "闲家和庄家单独比较点数，黑杰克（A+10+）最大\n";
-        std::cout << "要牌：\n";
-        std::cout << "条件：当前手牌点数不超过21点\n";
-        std::cout << "花费：无\n";
-        std::cout << "效果：获得一张牌，和现有的牌点数相加，如果超过21点则爆牌，等于21点则停牌，小于21点可以继续要牌、停牌、加倍\n";
-        std::cout << "\n";
-        std::cout << "停牌：结束此回合，等待结果\n";
-        std::cout << "条件：无\n";
-        std::cout << "花费：无\n";
-        std::cout << "\n";
-        std::cout << "加倍：\n";
-        std::cout << "条件：没有分牌\n";
-        std::cout << "花费：下注筹码数\n";
-        std::cout << "效果：获得一张牌，不管是否超过21点，结束此手牌操作，如果最后胜利，可获得双倍奖励\n";
-        std::cout << "\n";
-        std::cout << "分牌：\n";
-        std::cout << "条件：闲家手牌为对子，或者开局点数超过21点\n";
-        std::cout << "花费：下注筹码数\n";
-        std::cout << "效果：将两张牌分成两份，由同一玩家进行操作，分牌后不能加倍，拿到BlackJack牌型也算普通21点\n";
-        std::cout << "\n";
-        std::cout << "保险：\n";
-        std::cout << "条件：庄家第一张牌为A，玩家需要选择是否购买保险。\n";
-        std::cout << "花费：一半下注筹码数\n";
-        std::cout << "购买：庄家是黑杰克（A+10)，庄家只赢得保险金，否则收走保险金继续后面的步骤\n";
-        std::cout << "不购买：庄家为黑杰克则没收全部下注\n";
-        std::cout << "*****************************************************************\n";
-        std::cout << "\n";
-    }
 
+    std::string disStr = "";
+
+    disStr+= "*****BlackJack/21点控制台版*****\n";
+    disStr+= "显示规则：R\n";
+
+    if (isShowRule) {
+        disStr+= "游戏规则：\n";
+        disStr+= "闲家和庄家单独比较点数，黑杰克（A+10+）最大\n";
+        disStr+= "要牌：\n";
+        disStr+= "条件：当前手牌点数不超过21点\n";
+        disStr+= "花费：无\n";
+        disStr+= "效果：获得一张牌，和现有的牌点数相加，如果超过21点则爆牌，等于21点则停牌，小于21点可以继续要牌、停牌、加倍\n";
+        disStr+= "\n";
+        disStr+= "停牌：结束此回合，等待结果\n";
+        disStr+= "条件：无\n";
+        disStr+= "花费：无\n";
+        disStr+= "\n";
+        disStr+= "加倍：\n";
+        disStr+= "条件：没有分牌\n";
+        disStr+= "花费：下注筹码数\n";
+        disStr+= "效果：获得一张牌，不管是否超过21点，结束此手牌操作，如果最后胜利，可获得双倍奖励\n";
+        disStr+= "\n";
+        disStr+= "分牌：\n";
+        disStr+= "条件：闲家手牌为对子，或者开局点数超过21点\n";
+        disStr+= "花费：下注筹码数\n";
+        disStr+= "效果：将两张牌分成两份，由同一玩家进行操作，分牌后不能加倍，拿到BlackJack牌型也算普通21点\n";
+        disStr+= "\n";
+        disStr+= "保险：\n";
+        disStr+= "条件：庄家第一张牌为A，玩家需要选择是否购买保险。\n";
+        disStr+= "花费：一半下注筹码数\n";
+        disStr+= "购买：庄家是黑杰克（A+10)，庄家只赢得保险金，否则收走保险金继续后面的步骤\n";
+        disStr+= "不购买：庄家为黑杰克则没收全部下注\n";
+        disStr+= "*****************************************************************\n";
+        disStr+= "\n";
+    }
 
     if (mSession == 0) {
-        //1.下注环节Q A D Z C
-        std::cout << "名称\t" << "数量\t" << "增加\t" << "减少\n";
-        std::cout << "筹码\t"<< std::to_string(mCoin) <<"\tQ\tE\n";
-        std::cout << "下注\t"<< std::to_string(mBet)<<"\tA\tD\n";
-        std::cout << "基数\t"<< std::to_string(static_cast<int>(mBase))<<"\tZ\tC\n\n";
-
-        std::cout << "开始游戏：H\n";
+        disStr += "名称\t数量\t增加\t减少\n";
+        disStr += "筹码\t" + std::to_string(mCoin) + "\tQ\tE\n";
+        disStr += "下注\t" + std::to_string(mBet) + "\tA\tD\n";
+        disStr += "基数\t" + std::to_string(static_cast<int>(mBase)) + "\tZ\tC\n\n";
+        disStr += "开始游戏：H\n";
     }
     else if (mSession & 7) {
-        //2.操作环节 A S D F
-        std::cout << "筹码\t下注\n";
-        std::cout << std::to_string(mCoin)<< "\t"<<std::to_string(mBet)<<"\n\n";
-
-        std::cout << "牌面\n";
+        disStr += "筹码\t下注\n";
+        disStr += std::to_string(mCoin) + "\t" + std::to_string(mBet) + "\n\n";
+        disStr += "牌面\n";
 
         //没有结束前庄家只显示一张牌
         if (mSession & 4) {
-            std::cout << "庄家：" << cards_banker->GetCardsDisplayStr() << "\t点数：" << cards_banker->GetSumDisplayStr() << "\n";
+            disStr += "庄家：" + cards_banker->GetCardsDisplayStr() + "\t点数：" + cards_banker->GetSumDisplayStr() + "\n";
         }
         else {
-            std::cout << "庄家：" << cards_banker->GetBankerCardsDisplayStr() << "\t点数：" << cards_banker->GetBankerSumDisplayStr() << "\n";
+            disStr += "庄家：" + cards_banker->GetBankerCardsDisplayStr() + "\t点数：" + cards_banker->GetBankerSumDisplayStr() + "\n";
         }
+        disStr += "闲家：\n";
+        disStr += "手牌：" + cards_player_1->GetCardsDisplayStr() + "\t点数：" + cards_player_1->GetSumDisplayStr();
         
-        std::cout << "闲家：\n";
-        std::cout << "手牌：" << cards_player_1->GetCardsDisplayStr() << "\t点数：" << cards_player_1->GetSumDisplayStr();
+
         if (cards_player_1->winState == 1) {
-            std::cout << "\t胜利";
+            disStr += "\t胜利";
         }
         else if (cards_player_1->winState == -1) {
-            std::cout << "\t失败";
+            disStr += "\t失败";
         }
-        std::cout << "\n";
-
+        disStr += "\n";
         if (cards_player_1->isSplitCards) {
-            std::cout << "手牌：" << cards_player_2->GetCardsDisplayStr() << "\t点数：" << cards_player_2->GetSumDisplayStr();
+            disStr += "手牌：" + cards_player_2->GetCardsDisplayStr() + "\t点数：" + cards_player_2->GetSumDisplayStr();
             if (cards_player_2->winState == 1) {
-                std::cout << "\t胜利";
+                disStr += "\t胜利";
             }
             else if (cards_player_2->winState == -1) {
-                std::cout << "\t失败";
+                disStr += "\t失败";
             }
-            std::cout << "\n";
+            disStr += "\n";
         }
-        std::cout << "\n";
-        
+        disStr += "\n"; 
         if (isDebug) {
-            std::cout << "牌堆：\n";
+            disStr += "牌堆：\n";
             for (int i = 0; i < 52; i++) {
-                std::cout << Cards::GetCardName(cards[i]) << " ";
+                disStr += Cards::GetCardName(cards[i]) + " ";
             }
-            std::cout << "\n";
-            
-            std::cout << "当前牌堆：\n";
+            disStr += "\n";
+            disStr += "当前牌堆：\n";
             for (int i = 0; i < cards_ptr; i++) {
-                std::cout << Cards::GetCardName(cards[i]) << " ";
+                disStr += Cards::GetCardName(cards[i]) + " ";
             }
-            std::cout << "\n";
-
-            std::cout << "庄家手牌：\n";
+            disStr += "\n";
+            disStr += "庄家手牌：\n";
             for (int i = 0; i < cards_banker->num_cards; i++) {
-                std::cout << Cards::GetCardName(cards_banker->cards[i]) << " ";
+                disStr += Cards::GetCardName(cards_banker->cards[i]) + " ";
             }
-            std::cout << "\n";
-
-            std::cout << "闲家手牌：\n";
+            disStr += "\n";
+            disStr += "闲家手牌：\n";
             for (int i = 0; i < cards_player_1->num_cards; i++) {
-                std::cout << Cards::GetCardName(cards_player_1->cards[i]) << " ";
+                disStr += Cards::GetCardName(cards_player_1->cards[i]) + " ";
             }
-            std::cout << "\n";
-            std::cout << "\n";
+            disStr += "\n";
+            disStr += "\n";
         }
 
         if (mSession & 1) {
-            std::cout << "庄家明牌为A，是否购买保险？\n";
-            std::cout << "A：购买保险\n";
-            std::cout << "D：不购买保险\n";
+            disStr += "庄家明牌为A，是否购买保险？\n";
+            disStr += "A：购买保险\n";
+            disStr += "D：不购买保险\n";
         }
         else if(mSession & 2){
             if (cards_current == cards_player_1) {
-                std::cout << "正在操作手牌一\n";
+                disStr += "正在操作手牌一\n";
             }else if (cards_current == cards_player_2) {
-                std::cout << "正在操作手牌二\n";
+                disStr += "正在操作手牌二\n";
             }
-            std::cout << "A：要牌\n";
-            std::cout << "S：停牌\n";
-
+            disStr += "A：要牌\n";
+            disStr += "S：停牌\n";
             if (!cards_player_1->isSplitCards && mCoin >= mBet) {
-                std::cout << "D：加倍\n";
+                disStr += "D：加倍\n";
             }
             if (!cards_player_1->isSplitCards&& cards_player_1->isDouble) {
-                std::cout << "F：分牌\n";
+                disStr += "F：分牌\n";
             }
         }
         else if (mSession & 4) {
             if (mWinCoin == 0) {
-                std::cout << "平局\n";
+                disStr += "平局\n";
             }
             else if (mWinCoin > 0) {
-                std::cout << "你赢得了" << abs(mWinCoin) << "筹码\n";
+                disStr += "你赢得了" + abs(mWinCoin);
+                disStr += "筹码\n";
             }
             else if (mWinCoin < 0) {
-                std::cout << "你损失了" << abs(mWinCoin) << "筹码\n";
+                disStr += "你损失了" + abs(mWinCoin);
+                disStr += "筹码\n";
             }
-            std::cout << "回到下注页面：H\n";
+            disStr += "回到下注页面：H\n";
         }
     }
+    std::cout << disStr;
 }
 

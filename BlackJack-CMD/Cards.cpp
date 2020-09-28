@@ -27,19 +27,12 @@ void Cards::ComputeAttribute()
     sum = 0;
     for (int i = 0; i < num_cards; i++) {
         if (cards[i] % 13 == 1) {
-            //A
             sum_min += 1;
             sum_max += 11;
         }
-        else {
-            if (cards[i] % 13 == 0) {
-                sum_min += 13;
-                sum_max += 13;
-            }
-            else {
-                sum_min += cards[i] % 13;
-                sum_max += cards[i] % 13;
-            }
+        else if(cards[i] % 13 == 0|| cards[i] % 13 >=10){
+            sum_min += 10;
+            sum_max += 10;
         }
     }
     sum = sum_max <= 21 ? sum_max : sum_min;
@@ -110,10 +103,10 @@ bool Cards::IsFirA()
 
 bool Cards::IsBlackJack()
 {
-    if (cards[0] % 13 == 1 && (cards[1] % 13 >= 10 || cards[1] % 13 >= 0)) {
+    if (cards[0] % 13 == 1 && (cards[1] % 13 > 10 || cards[1] % 13 == 0)) {
         return true;
     }
-    if (cards[1] % 13 == 1 && (cards[0] % 13 >= 10 || cards[0] % 13 >= 0)) {
+    if (cards[1] % 13 == 1 && (cards[0] % 13 > 10 || cards[0] % 13 == 0)) {
         return true;
     }
     return false;
@@ -145,11 +138,11 @@ std::string Cards::GetBankerSumDisplayStr()
 {
     int temp = cards[0] % 13;
     std::string str = "";
-    if (temp == 0) {
-        str = "13";
-    }
-    else if (temp == 1) {
+    if (temp == 1) {
         str = "11";
+    }
+    else if (temp == 0||temp>=10) {
+        str = "10";
     }
     else {
         str = std::to_string(temp);
